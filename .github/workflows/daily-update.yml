@@ -1,23 +1,13 @@
-# ============================================================
-#  AI Teaching Studio — Daily Auto-Update Workflow
-#  Runs every day at 6:00 AM (Pakistan Standard Time = UTC+5)
-#  So set UTC time to 01:00 for 6 AM PKT
-# ============================================================
-
 name: 🤖 Daily Article Generator
 
 on:
-  # ── Runs automatically every day at 6 AM Pakistan time ──
   schedule:
-    - cron: "0 1 * * *"   # 01:00 UTC = 06:00 PKT
-
-  # ── Also allows manual trigger from GitHub Actions tab ──
+    - cron: "0 1 * * *"   # 6:00 AM Pakistan time (UTC+5)
   workflow_dispatch:
-    inputs:
-      reason:
-        description: "Why are you running manually?"
-        required: false
-        default: "Manual test run"
+
+# ✅ FIX 1: Give GitHub Actions write permission
+permissions:
+  contents: write
 
 jobs:
   generate-articles:
@@ -25,35 +15,36 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # ── Step 1: Checkout the repo ──────────────────────────
       - name: 📥 Checkout Repository
         uses: actions/checkout@v4
         with:
+          # ✅ FIX 2: Use proper token with write access
           token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
 
-      # ── Step 2: Setup Node.js ──────────────────────────────
+      # ✅ FIX 3: Updated to Node.js 24 (20 is deprecated)
       - name: ⚙️ Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "24"
 
-      # ── Step 3: Run the automation script ─────────────────
       - name: 🤖 Generate New Articles with Claude AI
         env:
           CLAUDE_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
         run: node automation.js
 
-      # ── Step 4: Commit & push updated articles.json ───────
+      # ✅ FIX 4: Proper git config and push
       - name: 💾 Commit & Push New Articles
         run: |
-          git config --global user.name "AI Teaching Studio Bot"
-          git config --global user.email "bot@aiteachingstudio.com"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add articles.json
-          git diff --staged --quiet || git commit -m "🤖 Auto: Added $(date +'%d %b %Y') articles"
-          git push
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "🤖 Auto: New articles $(date +'%d %b %Y %H:%M')"
+            git push origin main
+          fi
 
-      # ── Step 5: Success notification ──────────────────────
       - name: ✅ Done
-        run: echo "New articles generated and published successfully!"
+        run: echo "Articles generated and published!"
