@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>AI Teaching Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --p1:#7C3AED;--p2:#A855F7;--p3:#C084FC;
+  --a1:#F59E0B;--a2:#F97316;--a3:#EF4444;
+  --g1:linear-gradient(135deg,#7C3AED,#A855F7,#F59E0B);
+  --g2:linear-gradient(135deg,#F59E0B,#F97316,#EF4444);
+  --g3:linear-gradient(135deg,#7C3AED 0%,#A855F7 50%,#F59E0B 100%);
+  --dark:#0F0A1E;--card:#1A1035;--surface:#241848;
+  --border:rgba(124,58,237,0.25);--text:#F0EBF8;--muted:#9B8FC0;
+  --white:#fff;
+}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;overflow-x:hidden;}
+
+/* PARTICLES */
+#particles{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+.particle{position:absolute;border-radius:50%;animation:float linear infinite;opacity:0;}
+@keyframes float{0%{transform:translateY(100vh) rotate(0deg);opacity:0;}10%{opacity:.6;}90%{opacity:.3;}100%{transform:translateY(-100px) rotate(720deg);opacity:0;}}
+
+/* CURSOR GLOW */
+.cursor-glow{position:fixed;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(124,58,237,.12),transparent 70%);pointer-events:none;z-index:0;transform:translate(-50%,-50%);transition:all .1s;}
+
+/* TOPBAR */
+.topbar{background:var(--g1);padding:8px 32px;display:flex;justify-content:space-between;align-items:center;position:relative;z-index:10;}
+.topbar-l{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#fff;display:flex;align-items:center;gap:8px;}
+.live-dot{width:7px;height:7px;background:#fff;border-radius:50%;animation:blink 1.2s infinite;}
+@keyframes blink{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.3;transform:scale(.7);}}
+.topbar-r{display:flex;gap:16px;}
+.topbar-r a{font-size:11px;font-weight:700;color:rgba(255,255,255,.8);text-decoration:none;cursor:pointer;letter-spacing:.06em;text-transform:uppercase;}
+.topbar-r a:hover{color:#fff;}
+
+/* HEADER */
+header{background:rgba(15,10,30,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 32px;position:sticky;top:0;z-index:100;}
+.hdr-main{display:flex;align-items:center;justify-content:space-between;padding:14px 0;}
+.logo{cursor:pointer;display:flex;align-items:center;gap:12px;}
+.logo-icon{width:42px;height:42px;border-radius:12px;background:var(--g1);display:flex;align-items:center;justify-content:center;font-size:22px;animation:logoSpin 6s linear infinite;}
+@keyframes logoSpin{0%,100%{box-shadow:0 0 0 0 rgba(124,58,237,.5);}50%{box-shadow:0 0 24px 8px rgba(168,85,247,.4);}}
+.logo-text{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.logo-sub{font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.1em;text-transform:uppercase;}
+nav{display:flex;gap:4px;}
+nav a{font-size:12px;font-weight:600;letter-spacing:.04em;color:var(--muted);text-decoration:none;cursor:pointer;padding:8px 14px;border-radius:8px;transition:.2s;white-space:nowrap;}
+nav a:hover,nav a.active{background:rgba(124,58,237,.2);color:var(--p3);}
+.hdr-actions{display:flex;gap:10px;align-items:center;}
+.search-btn{background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:10px;padding:8px 14px;font-size:12px;font-family:'Plus Jakarta Sans',sans-serif;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:6px;transition:.2s;}
+.search-btn:hover{border-color:var(--p2);color:var(--text);}
+.sub-btn{background:var(--g1);color:#fff;border:none;border-radius:10px;padding:9px 18px;font-size:12px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;position:relative;overflow:hidden;transition:.2s;}
+.sub-btn::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.2),transparent);opacity:0;transition:.2s;}
+.sub-btn:hover::after{opacity:1;}
+
+/* PAGES */
+.page{display:none;animation:fadeUp .4s ease;position:relative;z-index:1;}
+.page.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+
+/* HERO */
+.hero{padding:80px 32px 64px;position:relative;overflow:hidden;text-align:center;}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 30% 50%,rgba(124,58,237,.3) 0%,transparent 60%),radial-gradient(ellipse at 70% 50%,rgba(245,158,11,.2) 0%,transparent 60%);}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(124,58,237,.2);border:1px solid rgba(124,58,237,.4);color:var(--p3);font-size:12px;font-weight:700;padding:6px 16px;border-radius:20px;margin-bottom:24px;animation:badgePop .6s ease;}
+@keyframes badgePop{from{opacity:0;transform:scale(.8);}to{opacity:1;transform:scale(1);}}
+.hero h1{font-family:'Space Grotesk',sans-serif;font-size:58px;font-weight:700;line-height:1.1;margin-bottom:20px;}
+.hero h1 .grad{background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero p{font-size:17px;color:var(--muted);line-height:1.8;max-width:600px;margin:0 auto 36px;}
+.hero-actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+.btn-glow{background:var(--g1);color:#fff;border:none;border-radius:14px;padding:14px 32px;font-size:15px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;position:relative;overflow:hidden;box-shadow:0 0 32px rgba(124,58,237,.4);transition:.3s;}
+.btn-glow:hover{transform:translateY(-2px);box-shadow:0 8px 40px rgba(124,58,237,.6);}
+.btn-outline{background:transparent;color:var(--text);border:1.5px solid var(--border);border-radius:14px;padding:14px 32px;font-size:15px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;transition:.3s;}
+.btn-outline:hover{border-color:var(--p2);color:var(--p3);background:rgba(124,58,237,.1);}
+
+/* FLOATING ICONS */
+.float-icons{position:absolute;inset:0;pointer-events:none;}
+.fi{position:absolute;font-size:32px;animation:floatIcon 6s ease-in-out infinite;opacity:.15;}
+.fi:nth-child(1){left:5%;top:20%;animation-delay:0s;}
+.fi:nth-child(2){left:10%;top:60%;animation-delay:1s;}
+.fi:nth-child(3){right:5%;top:15%;animation-delay:2s;}
+.fi:nth-child(4){right:12%;top:65%;animation-delay:.5s;}
+.fi:nth-child(5){left:20%;top:80%;animation-delay:1.5s;}
+.fi:nth-child(6){right:20%;top:80%;animation-delay:2.5s;}
+@keyframes floatIcon{0%,100%{transform:translateY(0) rotate(0deg);}50%{transform:translateY(-20px) rotate(10deg);}}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:var(--border);border:1px solid var(--border);border-radius:20px;overflow:hidden;margin:0 32px 48px;}
+.stat{background:var(--card);padding:24px;text-align:center;transition:.3s;cursor:default;}
+.stat:hover{background:var(--surface);}
+.stat-num{font-family:'Space Grotesk',sans-serif;font-size:32px;font-weight:700;background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.stat-label{font-size:12px;color:var(--muted);font-weight:600;margin-top:4px;text-transform:uppercase;letter-spacing:.06em;}
+
+/* TICKER */
+.ticker{background:var(--g2);padding:10px 32px;display:flex;align-items:center;gap:16px;overflow:hidden;margin-bottom:0;}
+.ticker-label{font-size:10px;font-weight:800;letter-spacing:.12em;color:#fff;background:rgba(0,0,0,.3);padding:4px 12px;border-radius:20px;white-space:nowrap;flex-shrink:0;}
+.ticker-track{overflow:hidden;flex:1;}
+.ticker-text{font-size:12px;font-weight:600;color:#fff;white-space:nowrap;display:inline-block;animation:tick 25s linear infinite;}
+@keyframes tick{0%{transform:translateX(100%);}100%{transform:translateX(-100%);}}
+
+/* CATS */
+.cats-wrap{padding:20px 32px;display:flex;gap:10px;overflow-x:auto;border-bottom:1px solid var(--border);}
+.cat-chip{font-size:12px;font-weight:700;padding:8px 18px;border-radius:20px;border:1.5px solid var(--border);cursor:pointer;color:var(--muted);background:transparent;white-space:nowrap;transition:.25s;font-family:'Plus Jakarta Sans',sans-serif;}
+.cat-chip:hover,.cat-chip.active{background:var(--g1);color:#fff;border-color:transparent;box-shadow:0 4px 20px rgba(124,58,237,.4);}
+
+/* MAIN */
+.main-wrap{display:grid;grid-template-columns:1fr 300px;gap:32px;padding:40px 32px;max-width:1300px;margin:0 auto;}
+
+/* SEC TITLE */
+.sec-head{display:flex;align-items:center;gap:12px;margin-bottom:24px;}
+.sec-head-text{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;color:var(--text);}
+.sec-head-line{flex:1;height:2px;background:var(--g1);border-radius:2px;opacity:.4;}
+.sec-head-badge{font-size:10px;font-weight:700;background:var(--g1);color:#fff;padding:3px 10px;border-radius:10px;letter-spacing:.06em;text-transform:uppercase;}
+
+/* POSTS GRID */
+.posts-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+
+/* CARD */
+.post-card{background:var(--card);border:1px solid var(--border);border-radius:20px;overflow:hidden;cursor:pointer;transition:.35s;position:relative;group;}
+.post-card::before{content:'';position:absolute;inset:0;background:var(--g1);opacity:0;transition:.3s;z-index:0;border-radius:20px;}
+.post-card:hover{transform:translateY(-6px);box-shadow:0 16px 48px rgba(124,58,237,.3);border-color:var(--p2);}
+.post-card:hover .pc-body{background:transparent;}
+.pc-thumb{height:130px;display:flex;align-items:center;justify-content:center;font-size:48px;position:relative;overflow:hidden;}
+.pc-thumb-inner{position:absolute;inset:0;transition:.3s;}
+.post-card:hover .pc-thumb-inner{transform:scale(1.05);}
+.pc-emoji{position:relative;z-index:1;filter:drop-shadow(0 4px 16px rgba(0,0,0,.5));animation:emojiFloat 3s ease-in-out infinite;}
+@keyframes emojiFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
+.pc-body{padding:16px;position:relative;z-index:1;transition:.3s;}
+.pc-cat{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:10px;}
+.pc-title{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;line-height:1.35;margin-bottom:8px;color:var(--text);}
+.pc-excerpt{font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:12px;}
+.pc-footer{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--muted);}
+.pc-read{font-size:11px;font-weight:700;color:var(--p3);display:flex;align-items:center;gap:4px;background:none;border:none;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:.2s;}
+.pc-read:hover{color:var(--a1);}
+
+/* AI GENERATOR */
+.ai-gen-box{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:24px;margin-bottom:32px;position:relative;overflow:hidden;}
+.ai-gen-box::before{content:'';position:absolute;top:-40px;right:-40px;width:120px;height:120px;background:var(--g1);opacity:.1;border-radius:50%;filter:blur(30px);}
+.ai-gen-label{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--p3);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.ai-gen-label i{font-size:16px;}
+.ai-gen-box h3{font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;color:var(--text);margin-bottom:12px;}
+.ai-gen-box p{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:16px;}
+.topic-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;}
+.topic-chip{font-size:11px;font-weight:700;padding:6px 14px;border-radius:12px;border:1.5px solid var(--border);cursor:pointer;color:var(--muted);background:transparent;transition:.2s;font-family:'Plus Jakarta Sans',sans-serif;}
+.topic-chip:hover,.topic-chip.sel{background:var(--g1);color:#fff;border-color:transparent;}
+.gen-btn{width:100%;background:var(--g1);color:#fff;border:none;border-radius:12px;padding:12px;font-size:13px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:.3s;}
+.gen-btn:hover{opacity:.9;transform:translateY(-1px);}
+.gen-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.gen-result{margin-top:16px;background:var(--surface);border-radius:12px;padding:16px;font-size:13px;color:var(--text);line-height:1.8;border:1px solid var(--border);display:none;}
+.gen-result.show{display:block;animation:fadeUp .3s ease;}
+
+/* SIDEBAR */
+.sidebar{}
+.sb-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:20px;margin-bottom:20px;}
+.sb-title{font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;color:var(--text);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.sb-title i{color:var(--p3);}
+.sb-post{display:flex;gap:12px;margin-bottom:14px;cursor:pointer;padding-bottom:14px;border-bottom:1px solid var(--border);transition:.2s;}
+.sb-post:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
+.sb-post:hover .sb-post-title{color:var(--p3);}
+.sb-num{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700;color:rgba(124,58,237,.3);min-width:28px;line-height:1;}
+.sb-post-title{font-size:12px;font-weight:700;color:var(--text);line-height:1.4;margin-bottom:3px;transition:.2s;}
+.sb-post-meta{font-size:11px;color:var(--muted);}
+.newsletter-card{background:var(--g1);border-radius:20px;padding:24px;margin-bottom:20px;position:relative;overflow:hidden;}
+.newsletter-card::before{content:'✉️';position:absolute;right:-10px;top:-10px;font-size:80px;opacity:.15;}
+.nl-title{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;color:#fff;margin-bottom:8px;}
+.nl-p{font-size:12px;color:rgba(255,255,255,.8);line-height:1.7;margin-bottom:16px;}
+.nl-input{width:100%;padding:10px 14px;border:none;border-radius:10px;font-size:12px;font-family:'Plus Jakarta Sans',sans-serif;outline:none;margin-bottom:10px;background:rgba(255,255,255,.95);}
+.nl-btn{width:100%;background:rgba(0,0,0,.3);color:#fff;border:1.5px solid rgba(255,255,255,.4);border-radius:10px;padding:10px;font-size:12px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;transition:.2s;}
+.nl-btn:hover{background:rgba(0,0,0,.5);}
+.soc-row{display:flex;gap:8px;}
+.soc-btn{flex:1;padding:10px;border:1.5px solid var(--border);border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);font-size:18px;transition:.2s;background:transparent;}
+.soc-btn:hover{border-color:var(--p2);color:var(--p3);background:rgba(124,58,237,.1);}
+.tags-wrap{display:flex;flex-wrap:wrap;gap:8px;}
+.tag{font-size:11px;font-weight:700;padding:5px 12px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;color:var(--muted);transition:.2s;}
+.tag:hover{border-color:var(--p2);color:var(--p3);}
+
+/* ABOUT */
+.about-hero{padding:80px 32px;text-align:center;position:relative;overflow:hidden;}
+.about-hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(124,58,237,.3) 0%,transparent 70%);}
+.about-hero h1{font-family:'Space Grotesk',sans-serif;font-size:52px;font-weight:700;margin-bottom:16px;}
+.about-hero h1 span{background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.about-hero p{font-size:16px;color:var(--muted);max-width:540px;margin:0 auto;line-height:1.8;}
+.about-body{max-width:900px;margin:0 auto;padding:40px 32px;}
+.about-card{background:var(--card);border:1px solid var(--border);border-radius:24px;padding:32px;margin-bottom:24px;transition:.3s;}
+.about-card:hover{border-color:var(--p2);}
+.about-card h2{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700;margin-bottom:14px;background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.about-card p{font-size:14px;color:var(--muted);line-height:1.9;}
+.author-row{display:flex;gap:20px;align-items:center;margin-bottom:20px;}
+.author-av{width:80px;height:80px;border-radius:20px;background:var(--g1);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:#fff;flex-shrink:0;}
+.author-name{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;}
+.author-role{font-size:13px;color:var(--p3);font-weight:600;margin-top:4px;}
+.values-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px;}
+.val{background:var(--surface);border-radius:16px;padding:20px;border:1px solid var(--border);transition:.2s;}
+.val:hover{border-color:var(--p2);transform:translateY(-2px);}
+.val-icon{font-size:28px;margin-bottom:10px;}
+.val-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px;}
+.val-text{font-size:12px;color:var(--muted);line-height:1.7;}
+
+/* SINGLE POST */
+.post-hdr{padding:60px 32px 40px;position:relative;overflow:hidden;text-align:center;}
+.post-hdr-bg{position:absolute;inset:0;}
+.post-hdr-inner{position:relative;z-index:1;max-width:760px;margin:0 auto;}
+.ph-cat{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:5px 14px;border-radius:12px;background:rgba(124,58,237,.3);color:var(--p3);border:1px solid rgba(124,58,237,.4);margin-bottom:16px;}
+.ph-title{font-family:'Space Grotesk',sans-serif;font-size:40px;font-weight:700;line-height:1.15;margin-bottom:20px;}
+.ph-meta{display:flex;align-items:center;justify-content:center;gap:16px;font-size:12px;color:var(--muted);}
+.ph-av{width:32px;height:32px;border-radius:10px;background:var(--g1);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;}
+.ph-author-name{font-weight:700;color:var(--text);}
+.post-illus{width:100%;max-width:700px;margin:0 auto 40px;height:200px;border-radius:24px;display:flex;align-items:center;justify-content:center;font-size:80px;position:relative;overflow:hidden;}
+.post-body-wrap{max-width:760px;margin:0 auto;padding:0 32px 60px;}
+.back-btn{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--p3);cursor:pointer;background:none;border:none;font-family:'Plus Jakarta Sans',sans-serif;margin-bottom:32px;padding:0;}
+.back-btn:hover{color:var(--a1);}
+.post-content p{font-size:16px;color:var(--muted);line-height:1.95;margin-bottom:20px;}
+.post-content h2{font-family:'Space Grotesk',sans-serif;font-size:26px;font-weight:700;color:var(--text);margin:36px 0 14px;}
+.post-content h3{font-size:15px;font-weight:700;color:var(--p3);margin:24px 0 10px;text-transform:uppercase;letter-spacing:.06em;}
+.post-content ul{list-style:none;padding:0;margin-bottom:20px;}
+.post-content li{font-size:15px;color:var(--muted);line-height:1.8;padding:8px 0 8px 24px;border-bottom:1px solid var(--border);position:relative;}
+.post-content li::before{content:'→';position:absolute;left:0;color:var(--p3);font-weight:700;}
+.callout{background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.3);border-left:4px solid var(--p1);border-radius:0 16px 16px 0;padding:18px 22px;margin:24px 0;}
+.callout p{color:var(--p3);margin:0;font-size:14px;line-height:1.8;}
+.share-row{display:flex;align-items:center;gap:12px;margin:36px 0;padding:20px;background:var(--card);border:1px solid var(--border);border-radius:16px;}
+.share-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);}
+.share-chip{display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;border:1.5px solid var(--border);font-size:12px;font-weight:700;cursor:pointer;color:var(--muted);background:transparent;font-family:'Plus Jakarta Sans',sans-serif;transition:.2s;}
+.share-chip:hover{border-color:var(--p2);color:var(--p3);}
+.ptags{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:32px;}
+.ptag{font-size:11px;font-weight:700;padding:5px 12px;border-radius:10px;border:1.5px solid var(--border);cursor:pointer;color:var(--muted);transition:.2s;}
+.ptag:hover{border-color:var(--p2);color:var(--p3);}
+.comments-box{background:var(--card);border:1px solid var(--border);border-radius:20px;overflow:hidden;}
+.cb-hdr{background:var(--g1);padding:14px 20px;}
+.cb-hdr h3{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700;color:#fff;}
+.comment{display:flex;gap:14px;padding:20px;border-bottom:1px solid var(--border);}
+.c-av{width:38px;height:38px;border-radius:12px;background:var(--g1);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0;}
+.c-name{font-size:13px;font-weight:700;color:var(--text);}
+.c-date{font-size:11px;color:var(--muted);}
+.c-text{font-size:13px;color:var(--muted);line-height:1.7;margin-top:5px;}
+.comment-form{padding:20px;}
+.comment-form h4{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;margin-bottom:12px;}
+.comment-form textarea{width:100%;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:12px;font-size:13px;font-family:'Plus Jakarta Sans',sans-serif;color:var(--text);resize:vertical;min-height:90px;outline:none;transition:.2s;}
+.comment-form textarea:focus{border-color:var(--p2);}
+.comment-form button{margin-top:10px;background:var(--g1);color:#fff;border:none;border-radius:12px;padding:11px 28px;font-size:13px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;}
+.related-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:32px;}
+.related-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;cursor:pointer;transition:.25s;}
+.related-card:hover{border-color:var(--p2);transform:translateY(-3px);}
+.rc-cat{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--p3);margin-bottom:8px;}
+.rc-title{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;color:var(--text);line-height:1.3;}
+
+/* FOOTER */
+footer{background:var(--card);border-top:1px solid var(--border);margin-top:60px;}
+.footer-cta{background:var(--g1);padding:40px 32px;text-align:center;}
+.footer-cta h3{font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:700;color:#fff;margin-bottom:8px;}
+.footer-cta p{font-size:14px;color:rgba(255,255,255,.8);margin-bottom:20px;}
+.footer-cta button{background:#fff;color:var(--p1);border:none;border-radius:12px;padding:12px 32px;font-size:14px;font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;cursor:pointer;}
+.footer-body{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;padding:48px 32px;}
+.fb-brand-name{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:12px;}
+.fb-brand p{font-size:13px;color:var(--muted);line-height:1.8;}
+.fc-title{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--text);margin-bottom:14px;}
+.fc-link{display:block;font-size:13px;color:var(--muted);text-decoration:none;cursor:pointer;padding:4px 0;transition:.15s;}
+.fc-link:hover{color:var(--p3);}
+.footer-bottom{border-top:1px solid var(--border);padding:16px 32px;display:flex;justify-content:space-between;align-items:center;}
+.footer-bottom p{font-size:12px;color:var(--muted);}
+.fbl{display:flex;gap:16px;}
+.fbl a{font-size:12px;color:var(--muted);text-decoration:none;cursor:pointer;}
+.fbl a:hover{color:var(--p3);}
+
+/* LOADING */
+.loading{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13px;padding:16px 0;}
+.spinner{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--p2);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.typing-dots span{display:inline-block;width:6px;height:6px;background:var(--p3);border-radius:50%;margin:0 2px;animation:dot .8s ease-in-out infinite;}
+.typing-dots span:nth-child(2){animation-delay:.15s;}
+.typing-dots span:nth-child(3){animation-delay:.3s;}
+@keyframes dot{0%,80%,100%{transform:scale(0.6);opacity:.4;}40%{transform:scale(1);opacity:1;}}
+
+/* SCROLL REVEAL */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .5s ease,transform .5s ease;}
+.reveal.visible{opacity:1;transform:none;}
+</style>
+</head>
+<body>
+
+<div id="particles"></div>
+<div class="cursor-glow" id="cursorGlow"></div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-l"><span class="live-dot"></span> Live Now: GPT-5 Launched · AI Beats Doctors in Diagnosis · Gemini 3 Released</div>
+  <div class="topbar-r">
+    <a onclick="showPage('about')">About</a>
+    <a>Contact</a>
+    <a>Newsletter</a>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="hdr-main">
+    <div class="logo" onclick="showPage('home')">
+      <div class="logo-icon">🧠</div>
+      <div>
+        <div class="logo-text">AI Teaching Studio</div>
+        <div class="logo-sub">Technology & AI Education</div>
+      </div>
+    </div>
+    <nav>
+      <a class="active" onclick="showPage('home');setActive(this)">Home</a>
+      <a onclick="showPage('about');setActive(this)">About</a>
+      <a onclick="showPage('home');setActive(this)">AI Basics</a>
+      <a onclick="showPage('home');setActive(this)">Machine Learning</a>
+      <a onclick="showPage('home');setActive(this)">AI Tools</a>
+      <a onclick="showPage('home');setActive(this)">Career in AI</a>
+    </nav>
+    <div class="hdr-actions">
+      <button class="search-btn"><i class="ti ti-search" style="font-size:14px"></i> Search...</button>
+      <button class="sub-btn">Subscribe Free ✨</button>
+    </div>
+  </div>
+</header>
+
+<!-- HOME PAGE -->
+<div id="page-home" class="page active">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-bg"></div>
+    <div class="float-icons">
+      <div class="fi">🤖</div><div class="fi">💡</div><div class="fi">🧪</div>
+      <div class="fi">📚</div><div class="fi">⚡</div><div class="fi">🎓</div>
+    </div>
+    <div class="hero-badge">🎓 For Teachers, By Teachers</div>
+    <h1>Learn <span class="grad">Artificial Intelligence</span><br/>The Fun, Simple Way</h1>
+    <p>Colourful, beginner-friendly tutorials on AI, Machine Learning, ChatGPT and cutting-edge tools — crafted especially for educators around the world.</p>
+    <div class="hero-actions">
+      <button class="btn-glow" onclick="showPost(0)">Start Reading 🚀</button>
+      <button class="btn-outline" onclick="document.getElementById('ai-gen').scrollIntoView({behavior:'smooth'})">✨ Generate Article with AI</button>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats reveal">
+    <div class="stat"><div class="stat-num" id="s1">0</div><div class="stat-label">Articles Published</div></div>
+    <div class="stat"><div class="stat-num" id="s2">0</div><div class="stat-label">Monthly Readers</div></div>
+    <div class="stat"><div class="stat-num" id="s3">0</div><div class="stat-label">Subscribers</div></div>
+    <div class="stat"><div class="stat-num" id="s4">4.9 ⭐</div><div class="stat-label">Reader Rating</div></div>
+  </div>
+
+  <!-- TICKER -->
+  <div class="ticker">
+    <div class="ticker-label">🔥 Trending</div>
+    <div class="ticker-track"><div class="ticker-text">GPT-5 launches with reasoning leap &nbsp;•&nbsp; Google Gemini 3 beats all benchmarks &nbsp;•&nbsp; AI now writes better code than 90% of developers &nbsp;•&nbsp; Anthropic raises $3B &nbsp;•&nbsp; UNESCO releases AI Education guidelines &nbsp;•&nbsp; Meta open-sources Llama 4 &nbsp;•&nbsp; AI tutors deployed in 40 countries &nbsp;•&nbsp; GPT-5 launches with reasoning leap &nbsp;•&nbsp; Google Gemini 3 beats all benchmarks &nbsp;•&nbsp; AI now writes better code than 90% of developers</div></div>
+  </div>
+
+  <!-- CATS -->
+  <div class="cats-wrap">
+    <button class="cat-chip active">All Topics</button>
+    <button class="cat-chip">🤖 AI Basics</button>
+    <button class="cat-chip">🧠 Machine Learning</button>
+    <button class="cat-chip">💬 ChatGPT</button>
+    <button class="cat-chip">⚡ AI Tools</button>
+    <button class="cat-chip">✍️ Prompt Engineering</button>
+    <button class="cat-chip">🔬 Deep Learning</button>
+    <button class="cat-chip">💼 Career in AI</button>
+    <button class="cat-chip">📚 For Teachers</button>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main-wrap">
+    <div>
+      <!-- AI GENERATOR -->
+      <div class="ai-gen-box reveal" id="ai-gen">
+        <div class="ai-gen-label"><i class="ti ti-sparkles"></i> AI-Powered Article Generator</div>
+        <h3>Generate a Custom AI Tutorial Instantly ✨</h3>
+        <p>Pick a topic below and let our AI write a fresh, beginner-friendly article just for you — powered by Claude.</p>
+        <div class="topic-chips">
+          <button class="topic-chip sel" onclick="selectTopic(this,'What is ChatGPT and how does it work?')">💬 ChatGPT</button>
+          <button class="topic-chip" onclick="selectTopic(this,'How do neural networks learn?')">🧠 Neural Networks</button>
+          <button class="topic-chip" onclick="selectTopic(this,'Top AI tools for teachers in 2026')">📚 AI for Teachers</button>
+          <button class="topic-chip" onclick="selectTopic(this,'How to write effective AI prompts')">✍️ Prompt Writing</button>
+          <button class="topic-chip" onclick="selectTopic(this,'What is machine learning in simple terms?')">⚙️ Machine Learning</button>
+          <button class="topic-chip" onclick="selectTopic(this,'Future of AI in education')">🎓 AI in Education</button>
+        </div>
+        <button class="gen-btn" id="genBtn" onclick="generateArticle()"><i class="ti ti-sparkles"></i> Generate Article with AI</button>
+        <div class="gen-result" id="genResult"></div>
+      </div>
+
+      <!-- POSTS -->
+      <div class="sec-head reveal">
+        <div class="sec-head-text">Latest Articles</div>
+        <div class="sec-head-line"></div>
+        <div class="sec-head-badge">Fresh This Week</div>
+      </div>
+      <div class="posts-grid">
+
+        <div class="post-card reveal" onclick="showPost(0)">
+          <div class="pc-thumb"><div class="pc-thumb-inner" style="background:linear-gradient(135deg,#1a0d3d,#3d1a7a,#7C3AED)"></div><div class="pc-emoji">🤖</div></div>
+          <div class="pc-body">
+            <div class="pc-cat" style="background:rgba(124,58,237,.2);color:#C084FC;">🤖 AI Basics</div>
+            <div class="pc-title">What is Artificial Intelligence? A Beginner's Guide for Teachers</div>
+            <div class="pc-excerpt">AI is reshaping classrooms everywhere. Here's what every teacher needs to know to get started confidently.</div>
+            <div class="pc-footer"><span>Ahmed Khan · Jun 18 · 4 min</span><button class="pc-read">Read <i class="ti ti-arrow-right" style="font-size:11px"></i></button></div>
+          </div>
+        </div>
+
+        <div class="post-card reveal" onclick="showPost(1)">
+          <div class="pc-thumb"><div class="pc-thumb-inner" style="background:linear-gradient(135deg,#1a0a00,#4a1f00,#F97316)"></div><div class="pc-emoji">🧠</div></div>
+          <div class="pc-body">
+            <div class="pc-cat" style="background:rgba(249,115,22,.2);color:#FDBA74;">🧠 Machine Learning</div>
+            <div class="pc-title">ML vs Deep Learning: What's the Difference? (Super Simple)</div>
+            <div class="pc-excerpt">These two terms confuse everyone. Let's fix that with real-world classroom analogies and examples.</div>
+            <div class="pc-footer"><span>Sara Ali · Jun 15 · 6 min</span><button class="pc-read">Read <i class="ti ti-arrow-right" style="font-size:11px"></i></button></div>
+          </div>
+        </div>
+
+        <div class="post-card reveal" onclick="showPost(2)">
+          <div class="pc-thumb"><div class="pc-thumb-inner" style="background:linear-gradient(135deg,#0a1a0a,#1a4a1a,#22c55e)"></div><div class="pc-emoji">⚡</div></div>
+          <div class="pc-body">
+            <div class="pc-cat" style="background:rgba(34,197,94,.2);color:#86EFAC;">⚡ AI Tools</div>
+            <div class="pc-title">Top 10 AI Tools Every Teacher Should Be Using in 2026</div>
+            <div class="pc-excerpt">These tools will save you hours every week and make your lessons 10x more engaging for students.</div>
+            <div class="pc-footer"><span>Ahmed Khan · Jun 12 · 7 min</span><button class="pc-read">Read <i class="ti ti-arrow-right" style="font-size:11px"></i></button></div>
+          </div>
+        </div>
+
+        <div class="post-card reveal" onclick="showPost(0)">
+          <div class="pc-thumb"><div class="pc-thumb-inner" style="background:linear-gradient(135deg,#1a001a,#4a004a,#d946ef)"></div><div class="pc-emoji">✍️</div></div>
+          <div class="pc-body">
+            <div class="pc-cat" style="background:rgba(217,70,239,.2);color:#E879F9;">✍️ Prompt Engineering</div>
+            <div class="pc-title">How to Write Perfect AI Prompts Every Time (Teacher Edition)</div>
+            <div class="pc-excerpt">The quality of your AI output depends entirely on how you ask. Master this simple formula.</div>
+            <div class="pc-footer"><span>Zara Malik · Jun 10 · 5 min</span><button class="pc-read">Read <i class="ti ti-arrow-right" style="font-size:11px"></i></button></div>
+          </div>
+        </div>
+
+        <div class="post-card reveal" onclick="showPost(0)">
+          <div class="pc-thumb"><div class="pc-thumb-inner" style="background:linear-gradient(135deg,#001a1a,#004a3d,#14b8a6)"></div><div class="pc-emoji">📊</div></div>
+          <div class="pc-body">
+            <div class="pc-cat" style="background:rgba(20,184,166,.2);color:#5EEAD4;">📊 AI Basics</div>
+            <div class="pc-title">How AI Models Learn: Training Data Explained for Educators</div>
+            <div class="pc-excerpt">Ever wonder how AI gets so smart? It all comes down to data. Here's the full story in plain English.</div>
+            <div class="pc-footer"><span>Ahmed Khan · Jun 8 · 5 min</span><button class="pc-read">Read <i class="ti ti-arrow-right" style="font-size:11px"></i></button></div>
+          </div>
+        </div>
+
+        <div class="post-card reveal" onclick="showPost(0)">
+          <div class="pc-thumb"><div class="pc-thumb-inner" style="background:linear-gradient(135deg,#1a1500,#4a3a00,#eab308)"></div><div class="pc-emoji">🎓</div></div>
+          <div class="pc-body">
+            <div class="pc-cat" style="background:rgba(234,179,8,.2);color:#FDE047;">🎓 Career in AI</div>
+            <div class="pc-title">How Teachers Can Transition Into an AI Career in 2026</div>
+            <div class="pc-excerpt">Your teaching skills are more valuable in AI than you think. Here's a realistic, step-by-step roadmap.</div>
+            <div class="pc-footer"><span>Omar Farooq · Jun 5 · 8 min</span><button class="pc-read">Read <i class="ti ti-arrow-right" style="font-size:11px"></i></button></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sb-card reveal">
+        <div class="sb-title"><i class="ti ti-trending-up"></i> Most Read</div>
+        <div class="sb-post" onclick="showPost(0)"><div class="sb-num">01</div><div><div class="sb-post-title">ChatGPT vs Claude: Which AI is Better for Teachers?</div><div class="sb-post-meta">Jun 22 · 6 min</div></div></div>
+        <div class="sb-post" onclick="showPost(1)"><div class="sb-num">02</div><div><div class="sb-post-title">5 Ways AI is Completely Changing Education in 2026</div><div class="sb-post-meta">Jun 19 · 5 min</div></div></div>
+        <div class="sb-post" onclick="showPost(2)"><div class="sb-num">03</div><div><div class="sb-post-title">Google Gemini for Educators — Full Guide</div><div class="sb-post-meta">Jun 14 · 4 min</div></div></div>
+        <div class="sb-post" onclick="showPost(0)"><div class="sb-num">04</div><div><div class="sb-post-title">Neural Networks Explained With Classroom Analogies</div><div class="sb-post-meta">Jun 10 · 4 min</div></div></div>
+      </div>
+
+      <div class="newsletter-card reveal">
+        <div class="nl-title">📬 Join 12K+ Teachers</div>
+        <div class="nl-p">Get the best AI tutorials for educators in your inbox every week — completely free!</div>
+        <input class="nl-input" type="email" placeholder="your@email.com"/>
+        <button class="nl-btn">Subscribe Free ✨</button>
+      </div>
+
+      <div class="sb-card reveal">
+        <div class="sb-title"><i class="ti ti-users"></i> Follow Us</div>
+        <div class="soc-row">
+          <div class="soc-btn"><i class="ti ti-brand-twitter"></i></div>
+          <div class="soc-btn"><i class="ti ti-brand-youtube"></i></div>
+          <div class="soc-btn"><i class="ti ti-brand-instagram"></i></div>
+          <div class="soc-btn"><i class="ti ti-brand-linkedin"></i></div>
+        </div>
+      </div>
+
+      <div class="sb-card reveal">
+        <div class="sb-title"><i class="ti ti-tags"></i> Topics</div>
+        <div class="tags-wrap">
+          <span class="tag">ChatGPT</span><span class="tag">AI Tools</span><span class="tag">Beginner</span>
+          <span class="tag">Python</span><span class="tag">LLMs</span><span class="tag">Prompts</span>
+          <span class="tag">Gemini</span><span class="tag">Claude</span><span class="tag">NLP</span>
+          <span class="tag">GPT-5</span><span class="tag">For Teachers</span><span class="tag">EdTech</span>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <footer>
+    <div class="footer-cta">
+      <h3>🎓 Join 12,000+ Educators Learning AI</h3>
+      <p>Get weekly tutorials, tool reviews and AI news — built specifically for teachers.</p>
+      <button>Subscribe Free — No Spam Ever</button>
+    </div>
+    <div class="footer-body">
+      <div class="fb-brand">
+        <div class="fb-brand-name">AI Teaching Studio</div>
+        <p>Making AI education simple, vibrant, and accessible for every teacher on the planet — regardless of technical background.</p>
+      </div>
+      <div><div class="fc-title">Explore</div><a class="fc-link">Home</a><a class="fc-link">All Articles</a><a class="fc-link">Tutorials</a><a class="fc-link">AI Tools</a></div>
+      <div><div class="fc-title">Company</div><a class="fc-link" onclick="showPage('about')">About Us</a><a class="fc-link">Contact</a><a class="fc-link">Write for Us</a></div>
+      <div><div class="fc-title">Legal</div><a class="fc-link">Privacy Policy</a><a class="fc-link">Terms of Use</a><a class="fc-link">Disclaimer</a></div>
+    </div>
+    <div class="footer-bottom"><p>© 2026 AI Teaching Studio. All rights reserved.</p><div class="fbl"><a>Privacy</a><a>Terms</a><a>Sitemap</a></div></div>
+  </footer>
+</div>
+
+<!-- ABOUT PAGE -->
+<div id="page-about" class="page">
+  <div class="about-hero">
+    <div class="about-hero-bg"></div>
+    <div class="hero-badge">👋 Who We Are</div>
+    <h1>About <span>AI Teaching Studio</span></h1>
+    <p>We're on a mission to make AI understandable and joyful for every teacher on the planet — regardless of technical background.</p>
+  </div>
+  <div class="about-body">
+    <div class="about-card reveal">
+      <div class="author-row">
+        <div class="author-av">AK</div>
+        <div><div class="author-name">Ahmed Khan</div><div class="author-role">Founder & Lead AI Educator ✨</div></div>
+      </div>
+      <h2>Our Story</h2>
+      <p>AI Teaching Studio was founded in 2024 with one simple belief: AI education should not be locked behind expensive courses or confusing jargon. We started as a small personal blog and have grown into a trusted platform read by over 50,000 teachers and educators every month across 80+ countries.</p>
+    </div>
+    <div class="about-card reveal">
+      <h2>Our Mission</h2>
+      <p>We believe learning AI should feel exciting, colourful, and empowering — not intimidating. Every article is crafted to be clear, practical and genuinely useful — whether you're a kindergarten teacher or a university professor. No jargon. No gatekeeping. Just great AI education made for educators.</p>
+    </div>
+    <div class="about-card reveal">
+      <h2>Our Values</h2>
+      <div class="values-grid">
+        <div class="val"><div class="val-icon">💡</div><div class="val-title">Simplicity First</div><div class="val-text">Complex AI concepts explained so clearly your students could understand them too.</div></div>
+        <div class="val"><div class="val-icon">🎉</div><div class="val-title">Always Free</div><div class="val-text">Our core content will always be free. Knowledge is a right, not a privilege.</div></div>
+        <div class="val"><div class="val-icon">🚀</div><div class="val-title">Always Current</div><div class="val-text">AI moves fast. We publish fresh, accurate content every single week.</div></div>
+        <div class="val"><div class="val-icon">🤝</div><div class="val-title">Community Driven</div><div class="val-text">Your questions become our next articles. We write what teachers actually need.</div></div>
+      </div>
+    </div>
+  </div>
+  <footer>
+    <div class="footer-bottom" style="border-top:none;"><p>© 2026 AI Teaching Studio. All rights reserved.</p><div class="fbl"><a>Privacy</a><a>Terms</a><a onclick="showPage('home')">← Home</a></div></div>
+  </footer>
+</div>
+
+<!-- SINGLE POST PAGE -->
+<div id="page-post" class="page">
+  <div id="post-render"></div>
+</div>
+
+<script>
+// PARTICLES
+const pc=document.getElementById('particles');
+const colors=['#7C3AED','#A855F7','#F59E0B','#F97316','#EF4444','#C084FC','#FCD34D'];
+for(let i=0;i<30;i++){
+  const p=document.createElement('div');
+  p.className='particle';
+  const size=Math.random()*8+3;
+  p.style.cssText=`width:${size}px;height:${size}px;left:${Math.random()*100}%;background:${colors[Math.floor(Math.random()*colors.length)]};animation-duration:${Math.random()*15+10}s;animation-delay:${Math.random()*10}s;`;
+  pc.appendChild(p);
+}
+
+// CURSOR GLOW
+document.addEventListener('mousemove',e=>{
+  document.getElementById('cursorGlow').style.left=e.clientX+'px';
+  document.getElementById('cursorGlow').style.top=e.clientY+'px';
+});
+
+// COUNTER ANIMATION
+function animateCount(id,target,suffix=''){
+  let val=0;const el=document.getElementById(id);
+  if(!el)return;
+  const step=target/60;
+  const iv=setInterval(()=>{
+    val=Math.min(val+step,target);
+    el.textContent=Math.floor(val).toLocaleString()+(suffix);
+    if(val>=target)clearInterval(iv);
+  },25);
+}
+setTimeout(()=>{
+  animateCount('s1',120,'+');
+  animateCount('s2',50000,'+');
+  animateCount('s3',12000,'+');
+},800);
+
+// SCROLL REVEAL
+const observer=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');}});
+},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+
+// CAT CHIPS
+document.querySelectorAll('.cat-chip').forEach(c=>{
+  c.addEventListener('click',function(){
+    document.querySelectorAll('.cat-chip').forEach(x=>x.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+// PAGES
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  window.scrollTo(0,0);
+  setTimeout(()=>{
+    document.querySelectorAll('#page-'+name+' .reveal').forEach(el=>observer.observe(el));
+  },100);
+}
+function setActive(el){
+  document.querySelectorAll('nav a').forEach(a=>a.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// AI TOPIC SELECTION
+let selectedTopic='What is ChatGPT and how does it work?';
+function selectTopic(el,topic){
+  document.querySelectorAll('.topic-chip').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');
+  selectedTopic=topic;
+}
+
+// AI ARTICLE GENERATOR
+async function generateArticle(){
+  const btn=document.getElementById('genBtn');
+  const result=document.getElementById('genResult');
+  btn.disabled=true;
+  btn.innerHTML='<div class="spinner"></div> Writing your article... <div class="typing-dots"><span></span><span></span><span></span></div>';
+  result.style.display='flex';
+  result.style.alignItems='center';
+  result.style.gap='10px';
+  result.innerHTML='<div class="spinner"></div> <span style="color:var(--muted)">Claude is crafting your article...</span>';
+  result.className='gen-result show';
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-6',
+        max_tokens:1000,
+        system:`You are a friendly AI education writer for a blog called "AI Teaching Studio" aimed at teachers. 
+Write in a warm, enthusiastic, beginner-friendly tone with emoji used naturally. 
+Use simple language, short paragraphs, and clear headings marked with ##. 
+Start with a short intro, include 2-3 sections with headings, add a practical tip box starting with 💡 Tip:, and end with an encouraging closing line. 
+Keep it under 350 words. No markdown code blocks.`,
+        messages:[{role:'user',content:`Write a short, engaging blog article about: "${selectedTopic}"`}]
+      })
+    });
+    const data=await resp.json();
+    const text=data.content.map(b=>b.text||'').join('');
+    // Format text
+    let html=text
+      .replace(/## (.+)/g,'<h3 style="font-family:Space Grotesk,sans-serif;font-size:17px;font-weight:700;color:var(--p3);margin:16px 0 8px;text-transform:uppercase;letter-spacing:.04em;">$1</h3>')
+      .replace(/💡 Tip:(.+)/g,'<div class="callout"><p>💡 Tip:$1</p></div>')
+      .replace(/\*\*(.+?)\*\*/g,'<strong style="color:var(--text)">$1</strong>')
+      .replace(/\n\n/g,'</p><p style="font-size:14px;color:var(--muted);line-height:1.9;margin-bottom:12px;">')
+      .replace(/\n/g,' ');
+    result.style.display='block';
+    result.innerHTML=`<div style="font-size:13px;font-weight:700;color:var(--p3);margin-bottom:12px;display:flex;align-items:center;gap:6px;"><i class="ti ti-sparkles"></i> AI-Generated Article: ${selectedTopic}</div><p style="font-size:14px;color:var(--muted);line-height:1.9;margin-bottom:12px;">${html}</p>`;
+  }catch(err){
+    result.innerHTML='<p style="color:#EF4444;">⚠️ Could not generate article. Please check your connection and try again.</p>';
+  }
+  btn.disabled=false;
+  btn.innerHTML='<i class="ti ti-sparkles"></i> Generate Another Article';
+}
+
+// POSTS DATA
+const posts=[
+  {cat:'AI Basics',emoji:'🤖',grad:'linear-gradient(135deg,#1a0d3d,#3d1a7a,#7C3AED)',title:"What is Artificial Intelligence? A Beginner's Guide for Teachers",author:'Ahmed Khan',initials:'AK',date:'June 18, 2026',read:'4 min read',content:`
+    <p>Artificial Intelligence — or AI — is one of the most talked-about topics of our time. But what does it actually mean? In the simplest terms, AI is the ability of a computer or machine to perform tasks that normally require human intelligence.</p>
+    <h2>What Can AI Do?</h2>
+    <p>AI can recognize faces in photos, understand spoken language, translate text, write essays, generate images, diagnose diseases, drive cars, and beat world champions at chess. These are all tasks that used to require a human brain — and now machines do them too.</p>
+    <div class="callout"><p>💡 Classroom Analogy: Think of AI like a very eager student who has read every book ever written. It doesn't truly "think" — but it has seen so many examples it can give remarkably good answers.</p></div>
+    <h2>How Does AI Work?</h2>
+    <p>At its core, AI works by learning from data. You show an AI system thousands of examples and it figures out patterns on its own. This process is called Machine Learning. The more data it gets, the smarter it becomes.</p>
+    <h3>Three Types of AI</h3>
+    <ul>
+      <li>Narrow AI — Designed for one specific task (like Siri, Google Maps, or Netflix recommendations)</li>
+      <li>General AI — Can do anything a human can (this doesn't fully exist yet)</li>
+      <li>Super AI — Smarter than all humans combined (still theoretical and far in the future)</li>
+    </ul>
+    <h2>Why Should Teachers Care?</h2>
+    <p>AI is already inside your classroom whether you know it or not — from the autocorrect on your phone to the plagiarism checker in your school portal. Understanding the basics helps you use these tools with confidence and teach your students to use them responsibly.</p>`
+  },
+  {cat:'Machine Learning',emoji:'🧠',grad:'linear-gradient(135deg,#1a0a00,#4a1f00,#F97316)',title:"Machine Learning vs Deep Learning: What's the Difference? (Super Simple)",author:'Sara Ali',initials:'SA',date:'June 15, 2026',read:'6 min read',content:`
+    <p>If you've been exploring AI, you've definitely bumped into the terms Machine Learning and Deep Learning. They're often used interchangeably — but they are actually different things. Let's settle this once and for all, teacher-style.</p>
+    <h2>What is Machine Learning?</h2>
+    <p>Machine Learning (ML) is a subset of AI where computers learn from data without being told exactly what to do. Instead of writing rules, you feed the machine lots of examples and let it discover the patterns itself.</p>
+    <div class="callout"><p>💡 Teacher Analogy: It's like marking 500 essays and then being able to grade new ones automatically — because you've seen enough examples to know what a good essay looks like.</p></div>
+    <h2>What is Deep Learning?</h2>
+    <p>Deep Learning is a subset of Machine Learning that uses artificial neural networks — inspired by the structure of the human brain. These networks have many layers (hence "deep") and are especially powerful for recognizing images, speech, and language.</p>
+    <h3>Key Differences</h3>
+    <ul>
+      <li>ML needs humans to identify key features; Deep Learning discovers them automatically</li>
+      <li>ML works well with smaller datasets; Deep Learning needs massive amounts of data</li>
+      <li>ML trains faster; Deep Learning requires powerful GPUs and much more time</li>
+      <li>Deep Learning generally achieves better results on complex tasks like image recognition</li>
+    </ul>
+    <h2>Which Should You Teach or Learn First?</h2>
+    <p>Start with Machine Learning concepts — they are more intuitive and build the right mental model. Once comfortable with regression, classification, and decision trees, then explore Deep Learning. Both are highly valued in industry and education today.</p>`
+  },
+  {cat:'AI Tools',emoji:'⚡',grad:'linear-gradient(135deg,#0a1a0a,#1a4a1a,#22c55e)',title:'Top 10 AI Tools Every Teacher Should Be Using in 2026',author:'Ahmed Khan',initials:'AK',date:'June 12, 2026',read:'7 min read',content:`
+    <p>The AI tools landscape has exploded in 2026. There's now an AI tool for almost every part of a teacher's day — from lesson planning to grading to parent communication. Here are the top 10 every educator should know.</p>
+    <h2>1. ChatGPT (OpenAI)</h2>
+    <p>The world's most popular AI assistant. Use it to create lesson plans, write quiz questions, simplify complex topics, draft emails to parents, and much more. The free version is surprisingly powerful.</p>
+    <h2>2. Claude (Anthropic)</h2>
+    <p>Especially strong at long-form writing, nuanced thinking, and analysing documents. Great for reading student essays and giving detailed feedback. Many teachers prefer it for its thoughtful, careful tone.</p>
+    <div class="callout"><p>💡 Pro Tip: Don't just use ONE AI tool. Try the same task in two different tools and compare. You'll often get surprisingly different — and complementary — results!</p></div>
+    <h2>3. Canva AI</h2>
+    <p>Create stunning classroom posters, presentations, and worksheets in seconds. Canva's AI features can generate designs, write slide text, and even suggest layouts based on your topic.</p>
+    <h3>More Must-Know Tools for Teachers</h3>
+    <ul>
+      <li>Diffit — automatically differentiates reading materials for different ability levels</li>
+      <li>MagicSchool AI — purpose-built for educators with 60+ teacher tools in one place</li>
+      <li>Otter.ai — transcribes your lessons and meetings automatically</li>
+      <li>Gamma — creates beautiful AI-powered presentations from a single prompt</li>
+      <li>Curipod — generates interactive lessons with polls, word clouds, and discussions</li>
+      <li>Grammarly AI — helps students (and you!) write more clearly and confidently</li>
+      <li>Khanmigo — Khan Academy's AI tutor that guides students without giving away answers</li>
+    </ul>`
+  }
+];
+
+function showPost(idx){
+  const p=posts[idx],n=(idx+1)%3,pr=(idx+2)%3;
+  document.getElementById('post-render').innerHTML=`
+    <div class="post-hdr">
+      <div class="post-hdr-bg" style="background:${p.grad};opacity:.3;position:absolute;inset:0;"></div>
+      <div class="post-hdr-inner">
+        <div class="ph-cat">${p.emoji} ${p.cat}</div>
+        <div class="ph-title">${p.title}</div>
+        <div class="ph-meta">
+          <div class="ph-author"><div class="ph-av">${p.initials}</div><div><div class="ph-author-name">${p.author}</div>${p.date}</div></div>
+          <span>·</span><span>${p.read}</span>
+        </div>
+      </div>
+    </div>
+    <div class="post-illus" style="background:${p.grad};margin:24px 32px;">${p.emoji}</div>
+    <div class="post-body-wrap">
+      <button class="back-btn" onclick="showPage('home')"><i class="ti ti-arrow-left" style="font-size:13px"></i> Back to Home</button>
+      <div class="post-content">${p.content}</div>
+      <div class="ptags"><span class="ptag">AI</span><span class="ptag">${p.cat}</span><span class="ptag">Beginner</span><span class="ptag">Teachers</span><span class="ptag">Tutorial</span></div>
+      <div class="share-row">
+        <span class="share-label">Share:</span>
+        <button class="share-chip"><i class="ti ti-brand-twitter" style="font-size:14px"></i> Twitter</button>
+        <button class="share-chip"><i class="ti ti-brand-linkedin" style="font-size:14px"></i> LinkedIn</button>
+        <button class="share-chip"><i class="ti ti-link" style="font-size:14px"></i> Copy Link</button>
+      </div>
+      <div class="comments-box">
+        <div class="cb-hdr"><h3>💬 Comments (2)</h3></div>
+        <div class="comment"><div class="c-av">RK</div><div><div class="c-name">Raza Khan</div><div class="c-date">Jun 19, 2026</div><div class="c-text">This is exactly what I was looking for as a teacher! Super clear and easy to understand. Thank you! 🙏</div></div></div>
+        <div class="comment"><div class="c-av">SA</div><div><div class="c-name">Sara Ahmed</div><div class="c-date">Jun 20, 2026</div><div class="c-text">Shared this with my whole school staff. Finally an explanation that doesn't require a CS degree! ⭐⭐⭐⭐⭐</div></div></div>
+        <div class="comment-form"><h4>✍️ Leave a Comment</h4><textarea placeholder="Share your thoughts or questions..."></textarea><button>Post Comment 💬</button></div>
+      </div>
+      <div style="margin-top:40px">
+        <div class="sec-head"><div class="sec-head-text">Related Articles</div><div class="sec-head-line"></div></div>
+        <div class="related-grid">
+          <div class="related-card" onclick="showPost(${n})"><div class="rc-cat">${posts[n].cat}</div><div class="rc-title">${posts[n].title}</div></div>
+          <div class="related-card" onclick="showPost(${pr})"><div class="rc-cat">${posts[pr].cat}</div><div class="rc-title">${posts[pr].title}</div></div>
+        </div>
+      </div>
+    </div>`;
+  showPage('post');
+}
+</script>
+</body>
+</html>
