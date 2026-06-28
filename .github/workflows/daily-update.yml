@@ -1,0 +1,59 @@
+# ============================================================
+#  AI Teaching Studio — Daily Auto-Update Workflow
+#  Runs every day at 6:00 AM (Pakistan Standard Time = UTC+5)
+#  So set UTC time to 01:00 for 6 AM PKT
+# ============================================================
+
+name: 🤖 Daily Article Generator
+
+on:
+  # ── Runs automatically every day at 6 AM Pakistan time ──
+  schedule:
+    - cron: "0 1 * * *"   # 01:00 UTC = 06:00 PKT
+
+  # ── Also allows manual trigger from GitHub Actions tab ──
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: "Why are you running manually?"
+        required: false
+        default: "Manual test run"
+
+jobs:
+  generate-articles:
+    name: Generate & Publish New Articles
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── Step 1: Checkout the repo ──────────────────────────
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # ── Step 2: Setup Node.js ──────────────────────────────
+      - name: ⚙️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # ── Step 3: Run the automation script ─────────────────
+      - name: 🤖 Generate New Articles with Claude AI
+        env:
+          CLAUDE_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
+        run: node automation.js
+
+      # ── Step 4: Commit & push updated articles.json ───────
+      - name: 💾 Commit & Push New Articles
+        run: |
+          git config --global user.name "AI Teaching Studio Bot"
+          git config --global user.email "bot@aiteachingstudio.com"
+          git add articles.json
+          git diff --staged --quiet || git commit -m "🤖 Auto: Added $(date +'%d %b %Y') articles"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # ── Step 5: Success notification ──────────────────────
+      - name: ✅ Done
+        run: echo "New articles generated and published successfully!"
